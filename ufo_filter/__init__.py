@@ -262,11 +262,11 @@ class Context(object):
         self.dirname = ['.']
         if not parent:
             self.parent = self
+            self.tdrex = tdrex
         else:
             self.parent = parent
+            self.tdrex = parent.tdrex
         self.subcontexts = {}
-
-        self.tdrex = tdrex
 
     def curdir(self):
         return self.dirname[len(self.dirname) - 1]
@@ -401,7 +401,7 @@ class Context(object):
                 self.tdrex = auto_rex
                 inf.close()
                 break
-                
+
     def loadTagDefs(self, infile):
 
         if self.AUTO_SELECT_TD:
