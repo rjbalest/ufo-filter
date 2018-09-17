@@ -3,7 +3,7 @@ from setuptools import setup
 setup(name='ufo-filter',
       version='1.0',
       description='Functional text substitution system',
-      url='http://github.com/rjbalest',
+      url='https://github.com/rjbalest/ufo-filter.git',
       author='Russell Balest',
       author_email='russell@balest.com',
       license='MIT',
