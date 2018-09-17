@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from ufo_filter import Context, Parser
+from ufo_filter import Context, EBContext, Parser
 
 # A trivial but useful implementation of configure
 def usage():

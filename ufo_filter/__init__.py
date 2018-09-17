@@ -83,6 +83,8 @@ tdrex = re.compile('^(([_\.a-zA-Z0-9]*)\.)?([_a-zA-Z]+[()_0-9a-zA-Z \-]*)[\t]+(.
 # The EB env file RE syntax is:
 ebrex = re.compile('^export (([_\.a-zA-Z0-9]*)\.)?([_a-zA-Z]+[()_0-9a-zA-Z \-]*)=[\'\"](.*)[\'\"]$')
 
+# List of known tag file formats
+tdrexes = { 'nv_tab' : tdrex, 'eb_env' : ebrex }
 
 # To handle recursion level during exceptions
 # for more meaningful stack trace.
@@ -244,14 +246,14 @@ def lineParser(line, context, lineByLine=True):
 
     return line
 
-
-class Context:
+class Context(object):
     def __init__(self, name='.', parent=None):
         self.ALLOW_UNKNOWN_TAGS = 0
         self.ALLOW_DEFAULT_TAGS = True
         self.ALLOW_TAG_OVERRIDES = 0
         self.ENABLE_TAG_APPENDS = 0
         self.ALLOW_TAG_DEFAULTS = True
+        self.AUTO_SELECT_TD = True
 
         self.name = name
         self.tagNames = []
@@ -263,6 +265,8 @@ class Context:
         else:
             self.parent = parent
         self.subcontexts = {}
+
+        self.tdrex = tdrex
 
     def curdir(self):
         return self.dirname[len(self.dirname) - 1]
@@ -375,14 +379,42 @@ class Context:
         # TODO: Make it unique ?
         self.tagNames.append(tag)
 
+    # Try to parse with all known regexes
+    # and set the regex accordingly
+    def autoSelectTD(self,infile):
+        auto_rex=None
+        for rex_name in tdrexes.keys():
+            rex = tdrexes[rex_name]
+            inf = open(infile, 'r')
+            for line in inf.readlines():
+                try:
+                    # Skip comments and blank lines
+                    if line[0] != '#' and line[0] != '\n':
+                        reo = rex.match(line)
+                        if reo:
+                            print "Parsing tag definitions as %s" % (rex_name)
+                            self.tdrex = rex
+                            break
+                except:
+                    continue
+            if auto_rex:
+                self.tdrex = auto_rex
+                inf.close()
+                break
+                
     def loadTagDefs(self, infile):
+
+        if self.AUTO_SELECT_TD:
+            self.autoSelectTD(infile)
+
         inf = open(infile, 'r')
         linecount = 0
 
         for line in inf.readlines():
             try:
+                # Skip comments and blank lines
                 if line[0] != '#' and line[0] != '\n':
-                    reo = tdrex.match(line)
+                    reo = self.tdrex.match(line)
                     if reo:
                         ns = reo.group(2)
                         tag = reo.group(3)
@@ -441,6 +473,11 @@ class Context:
             except ValueError, tag:
                 print "Badly formed line: '%s' on line %d" % (line, linecount)
 
+class EBContext(Context):
+    def __init__(self, name='.', parent=None):
+        super(EBContext, self).__init__(name, parent)
+        # Override the regex for tag definitions with the env based file in EB
+        self.tdrex = ebrex
 
 def loadList(infile):
     """
