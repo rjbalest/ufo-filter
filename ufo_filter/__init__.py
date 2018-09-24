@@ -77,14 +77,18 @@ rex = re.compile(
 # The @ symbol RE is:
 atx = re.compile('@@@')
 
-# The tag definition RE syntax is:
+# The native ufo tag definition RE syntax is:
 tdrex = re.compile('^(([_\.a-zA-Z0-9]*)\.)?([_a-zA-Z]+[()_0-9a-zA-Z \-]*)[\t]+(.*)$')
 
 # The EB env file RE syntax is:
 ebrex = re.compile('^export (([_\.a-zA-Z0-9]*)\.)?([_a-zA-Z]+[()_0-9a-zA-Z \-]*)=[\'\"](.*)[\'\"]$')
 
+# The yaml RE syntax is:
+# The EB env file RE syntax is:
+yamlrex = re.compile('^(([_\.a-zA-Z0-9]*)\.)?([_a-zA-Z]+[()_0-9a-zA-Z \-]*)=[\'\"]?([^\'^\".]*)[\'\"]?$')
+
 # List of known tag file formats
-tdrexes = { 'nv_tab' : tdrex, 'eb_env' : ebrex }
+tdrexes = { 'nv_tab' : tdrex, 'eb_env' : ebrex, 'nv_yaml' : yamlrex }
 
 # To handle recursion level during exceptions
 # for more meaningful stack trace.
